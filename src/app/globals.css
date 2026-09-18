@@ -134,24 +134,6 @@ body {
   animation: blob-drift 11s ease-in-out infinite;
 }
 
-/* ---- a slow 3D-spinning medallion for the landing hero ---- */
-@keyframes spin-3d {
-  from {
-    transform: rotateY(0deg);
-  }
-  to {
-    transform: rotateY(360deg);
-  }
-}
-.medallion-3d {
-  transform-style: preserve-3d;
-  perspective: 400px;
-}
-.medallion-3d-inner {
-  transform-style: preserve-3d;
-  animation: spin-3d 9s linear infinite;
-}
-
 /* ---- loyalty ticket: shared by the customer card and the merchant preview ---- */
 
 @keyframes stamp-in {

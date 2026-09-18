@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BusinessName } from "@/components/BusinessName";
+import CubeField from "@/components/CubeField";
 
 // This is what a customer lands on the instant they scan the in-store QR
 // or tap their phone on the NFC point — before they have an account.
@@ -24,17 +25,8 @@ export default function Home() {
         aria-hidden
       />
 
-      <div className="relative flex flex-col items-center gap-3 text-center">
-        <div className="medallion-3d grid h-14 w-14 place-items-center">
-          <span
-            className="medallion-3d-inner grid h-14 w-14 place-items-center rounded-2xl shadow-[0_10px_24px_-10px_rgba(124,58,237,0.55)]"
-            style={{
-              background: "linear-gradient(135deg, var(--accent), var(--accent-2))",
-            }}
-          >
-            <span className="h-7 w-7 rounded-full border-[3px] border-white/85" />
-          </span>
-        </div>
+      <div className="relative flex flex-col items-center gap-1 text-center">
+        <CubeField className="-mb-2 h-[190px] w-[190px]" />
         <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
           Has escaneado la tarjeta de
         </p>
