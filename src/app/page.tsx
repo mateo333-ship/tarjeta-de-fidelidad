@@ -20,40 +20,47 @@ export default function Home() {
           being boxed into the content column below. */}
       <CubeField />
 
-      <main className="relative mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center gap-8 px-4 py-10 sm:max-w-[520px] lg:max-w-[640px]">
-        <div className="relative flex flex-col items-center gap-1 text-center">
-          <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
-            Has escaneado la tarjeta de
-          </p>
-          <h1 className="font-display text-[26px] font-semibold sm:text-[32px]">
-            <BusinessName />
-          </h1>
-          <p className="max-w-[32ch] text-[14px] text-muted sm:max-w-[42ch] sm:text-[15px]">
-            Consigue tu tarjeta de sellos: guarda cada visita y canjea tu premio cuando la completes.
-          </p>
-        </div>
+      <main className="relative mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center px-4 py-10 sm:max-w-[520px] lg:max-w-[640px]">
+        {/* A solid "frame" behind all the readable content — the cube field
+            keeps animating exactly as before everywhere else on screen, it's
+            just visually covered here, like a card sitting on top of it.
+            Nothing about the cubes' motion changes, they simply can't be
+            seen through this panel. */}
+        <div className="relative flex flex-col gap-8 rounded-[28px] border border-line/60 bg-surface/95 px-6 py-9 shadow-[0_30px_70px_-30px_rgba(124,58,237,0.4)] backdrop-blur-md sm:px-10 sm:py-11">
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
+              Has escaneado la tarjeta de
+            </p>
+            <h1 className="font-display text-[26px] font-semibold sm:text-[32px]">
+              <BusinessName />
+            </h1>
+            <p className="max-w-[32ch] text-[14px] text-muted sm:max-w-[42ch] sm:text-[15px]">
+              Consigue tu tarjeta de sellos: guarda cada visita y canjea tu premio cuando la completes.
+            </p>
+          </div>
 
-        <div className="relative mx-auto flex w-full max-w-[360px] flex-col gap-3">
+          <div className="mx-auto flex w-full max-w-[360px] flex-col gap-3">
+            <Link
+              href="/join"
+              className="btn-primary rounded-xl px-4 py-3 text-center text-[14.5px] font-semibold"
+            >
+              Consigue tu tarjeta
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-xl border border-line px-4 py-3 text-center text-[14.5px] font-semibold text-muted"
+            >
+              Ya tengo tarjeta — iniciar sesión
+            </Link>
+          </div>
+
           <Link
-            href="/join"
-            className="btn-primary rounded-xl px-4 py-3 text-center text-[14.5px] font-semibold"
+            href="/negocio/login"
+            className="text-center font-data text-[11px] uppercase tracking-[0.08em] text-muted underline underline-offset-2"
           >
-            Consigue tu tarjeta
-          </Link>
-          <Link
-            href="/login"
-            className="rounded-xl border border-line bg-surface/70 px-4 py-3 text-center text-[14.5px] font-semibold text-muted backdrop-blur-sm"
-          >
-            Ya tengo tarjeta — iniciar sesión
+            Acceso del negocio
           </Link>
         </div>
-
-        <Link
-          href="/negocio/login"
-          className="relative text-center font-data text-[11px] uppercase tracking-[0.08em] text-muted underline underline-offset-2"
-        >
-          Acceso del negocio
-        </Link>
       </main>
     </>
   );
