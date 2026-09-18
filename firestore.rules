@@ -1,0 +1,75 @@
+rules_version = '2';
+
+// Security model for Sello Digital.
+//
+// - Every customer document lives at /customers/{uid}, where {uid} is
+//   that customer's own Firebase Auth uid. A signed-in customer may only
+//   ever read their OWN document (isOwner) — never another customer's —
+//   so cards never cross. Only a merchant account may list or write.
+// - "Merchant" is a Firebase Auth custom claim (`merchant: true`), set
+//   with scripts/setMerchant.mjs using the Admin SDK. It is NOT something
+//   a client can set on itself.
+// - Every field that changes a customer's stamp count, the program's
+//   config, or writes a stamp/redeem event is closed to direct client
+//   writes (`allow update/write: if false`) and only happens through the
+//   server route handlers in src/app/api/**, which use the Admin SDK
+//   (which bypasses these rules entirely) after verifying the caller's
+//   ID token carries the merchant claim. These rules are the client-side
+//   guard rail; the API routes are the real enforcement for anything
+//   sensitive.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isMerchant() {
+      return isSignedIn() && request.auth.token.merchant == true;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    match /customers/{uid} {
+      // A brand-new customer creates their OWN doc at signup, starting
+      // at zero stamps. They can never create it for someone else, and
+      // never with a starting balance.
+      allow create: if isOwner(uid)
+        && request.resource.data.stamps == 0
+        && request.resource.data.keys().hasOnly(
+          ['name', 'email', 'stamps', 'createdAt', 'updatedAt']
+        );
+
+      // Read your own card; a merchant can read any card (needed to look
+      // one up after a QR scan) and list all of them (the dashboard).
+      allow get: if isOwner(uid) || isMerchant();
+      allow list: if isMerchant();
+
+      // Stamps only ever change through /api/stamp and /api/redeem
+      // (Admin SDK, merchant-verified) — never a direct client write.
+      allow update, delete: if false;
+
+      match /events/{eventId} {
+        allow read: if isOwner(uid) || isMerchant();
+        allow write: if false;
+      }
+    }
+
+    // The one shared loyalty-program document (stamps needed, reward
+    // text). Any signed-in viewer can read it — a customer's card needs
+    // it to render "6 de 10 sellos". Only the server (via /api/config)
+    // writes it.
+    match /config/{docId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Everything else has no matching rule above, and Firestore denies by
+    // default — there is deliberately no catch-all block here, since a
+    // broad `{document=**}` sibling would itself need care to avoid ever
+    // being the rule that ends up granting something more specific rules
+    // meant to restrict.
+  }
+}
