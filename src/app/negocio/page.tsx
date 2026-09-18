@@ -237,7 +237,7 @@ export default function NegocioPage() {
               resetScan();
               setScanning(true);
             }}
-            className="rounded-xl bg-ink px-4 py-3 text-[14px] font-semibold text-paper"
+            className="btn-primary rounded-xl px-4 py-3 text-[14px] font-semibold"
           >
             Abrir cámara
           </button>
@@ -298,7 +298,7 @@ export default function NegocioPage() {
                   type="button"
                   disabled={busyId === scanned.id}
                   onClick={() => addStamp(scanned.id)}
-                  className="rounded-[10px] bg-ink px-3.5 py-2 text-[13px] font-semibold text-paper disabled:opacity-50"
+                  className="btn-primary rounded-[10px] px-3.5 py-2 text-[13px] font-semibold"
                 >
                   + 1 sello
                 </button>
@@ -356,7 +356,7 @@ export default function NegocioPage() {
           <button
             type="submit"
             disabled={cfgSaving}
-            className="col-span-2 rounded-[10px] bg-ink px-3.5 py-2.5 text-[13.5px] font-semibold text-paper disabled:opacity-50 max-[380px]:col-span-1"
+            className="btn-primary col-span-2 rounded-[10px] px-3.5 py-2.5 text-[13.5px] font-semibold max-[380px]:col-span-1"
           >
             {cfgSaving ? "Guardando…" : "Guardar"}
           </button>
@@ -410,7 +410,7 @@ export default function NegocioPage() {
                   type="button"
                   disabled={busyId === c.id}
                   onClick={() => addStamp(c.id)}
-                  className="flex-none rounded-[9px] bg-ink px-3 py-1.5 text-[12.5px] font-semibold text-paper disabled:opacity-50"
+                  className="btn-accent-soft flex-none rounded-[9px] px-3 py-1.5 text-[12.5px] font-semibold"
                 >
                   + Sello
                 </button>

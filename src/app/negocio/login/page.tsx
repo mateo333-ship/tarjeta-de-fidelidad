@@ -89,7 +89,7 @@ export default function NegocioLoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-1 rounded-xl bg-ink px-4 py-3 text-[14.5px] font-semibold text-paper disabled:opacity-50"
+          className="btn-primary mt-1 rounded-xl px-4 py-3 text-[14.5px] font-semibold"
         >
           {submitting ? "Entrando…" : "Entrar"}
         </button>

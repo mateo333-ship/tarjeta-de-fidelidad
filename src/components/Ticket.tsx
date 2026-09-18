@@ -28,6 +28,10 @@ export default function Ticket({
         background: "linear-gradient(165deg, var(--card-bg), var(--card-bg-2))",
       }}
     >
+      <div className="absolute inset-0 overflow-hidden rounded-[22px]" aria-hidden>
+        <div className="ticket-sheen" />
+      </div>
+
       <div className="flex items-start justify-between gap-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="grid h-[38px] w-[38px] flex-none place-items-center rounded-[10px] border border-card-fg/20 bg-card-fg/10 font-display text-sm font-bold">

@@ -1,32 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #eeeadd;
-  --surface: #faf8f0;
-  --surface-2: #f2efe3;
-  --line: #dad4c0;
-  --ink: #20241d;
-  --muted: #6f6c5a;
+  --paper: #f7f1fb;
+  --surface: #ffffff;
+  --surface-2: #f1e6fb;
+  --line: #ddd0ef;
+  --ink: #201233;
+  --muted: #7c6f95;
 
-  --card-bg: #20282a;
-  --card-bg-2: #2b3436;
-  --card-fg: #f6f3e8;
-  --card-muted: #aeb8b6;
+  --card-bg: #3b0f6b;
+  --card-bg-2: #b3186f;
+  --card-fg: #fbf5ff;
+  --card-muted: #d9c3ee;
 
-  --stamp: #b34433;
-  --stamp-dark: #87301f;
-  --gold: #c69a2e;
-  --gold-dark: #8f6c17;
+  --stamp: #e0227a;
+  --stamp-dark: #a30f5c;
+  --gold: #ffb020;
+  --gold-dark: #c9880a;
+
+  --accent: #7c3aed;
+  --accent-2: #ec4899;
+  --accent-soft: #f1e2fb;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #17190f;
-    --surface: #1e2015;
-    --surface-2: #242617;
-    --line: #3a3a26;
-    --ink: #ece7d6;
-    --muted: #a9a48c;
+    --paper: #100a1c;
+    --surface: #18101f;
+    --surface-2: #1f1629;
+    --line: #372a49;
+    --ink: #f1e9fb;
+    --muted: #b6a4cf;
+
+    --accent: #9a5cf5;
+    --accent-2: #f472b6;
+    --accent-soft: #2a1c3d;
   }
 }
 
@@ -48,6 +56,10 @@
   --color-gold: var(--gold);
   --color-gold-dark: var(--gold-dark);
 
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+
   --font-display: var(--font-bricolage), "Segoe UI", system-ui, sans-serif;
   --font-body: var(--font-public-sans), system-ui, -apple-system, sans-serif;
   --font-data: var(--font-space-mono), "SFMono-Regular", Consolas, monospace;
@@ -56,6 +68,88 @@
 body {
   background: var(--paper);
   color: var(--ink);
+}
+
+/* ---- primary action: violet -> pink gradient, used for the one main
+   call-to-action per screen. Smaller/secondary actions stay plain so the
+   gradient keeps meaning "this is the button to press". ---- */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  box-shadow:
+    0 12px 24px -12px rgba(124, 58, 237, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.06);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+.btn-primary:disabled {
+  opacity: 0.55;
+  filter: none;
+  transform: none;
+}
+
+/* ---- quieter accent pill, for repeated actions (one per row in a list)
+   where a full loud gradient on every row would be too much. ---- */
+.btn-accent-soft {
+  background: var(--accent-soft);
+  color: var(--accent);
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+}
+.btn-accent-soft:hover {
+  filter: brightness(0.97);
+}
+.btn-accent-soft:active {
+  transform: scale(0.96);
+}
+.btn-accent-soft:disabled {
+  opacity: 0.55;
+}
+
+/* ---- soft drifting gradient blobs used as page-background atmosphere.
+   Decorative only: pointer-events none, and behind real content. ---- */
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-4%, 5%, 0) scale(1.08);
+  }
+}
+.bg-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  pointer-events: none;
+  animation: blob-drift 11s ease-in-out infinite;
+}
+
+/* ---- a slow 3D-spinning medallion for the landing hero ---- */
+@keyframes spin-3d {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+.medallion-3d {
+  transform-style: preserve-3d;
+  perspective: 400px;
+}
+.medallion-3d-inner {
+  transform-style: preserve-3d;
+  animation: spin-3d 9s linear infinite;
 }
 
 /* ---- loyalty ticket: shared by the customer card and the merchant preview ---- */
@@ -78,6 +172,31 @@ body {
   animation: stamp-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.3);
 }
 
+/* a single soft light sweep across the ticket right after it's revealed */
+@keyframes sheen-sweep {
+  from {
+    transform: translateX(-130%) rotate(8deg);
+  }
+  to {
+    transform: translateX(230%) rotate(8deg);
+  }
+}
+.ticket-sheen {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 40%;
+  height: 140%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  animation: sheen-sweep 1.3s ease-out 0.25s 1 both;
+  pointer-events: none;
+}
+
 .ticket-notch {
   position: absolute;
   top: 120px;
@@ -97,7 +216,7 @@ body {
   left: 14px;
   right: 14px;
   top: 129px;
-  border-top: 1.5px dashed rgba(246, 243, 232, 0.25);
+  border-top: 1.5px dashed rgba(251, 245, 255, 0.25);
 }
 
 .ticket-complete::after {
@@ -106,7 +225,7 @@ body {
   top: -11px;
   right: 16px;
   background: var(--color-gold);
-  color: #20240a;
+  color: #2b0f42;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.03em;
