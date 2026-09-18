@@ -10,6 +10,8 @@ import { useAuthUser } from "@/lib/useAuthUser";
 import { DEFAULT_CONFIG, type ProgramConfig } from "@/lib/types";
 import Ticket from "@/components/Ticket";
 import InstallPwaButton from "@/components/InstallPwaButton";
+import BackButton from "@/components/BackButton";
+import { GridReveal } from "@/components/ui/grid-reveal";
 
 type CustomerDoc = { name: string; stamps: number };
 
@@ -50,14 +52,19 @@ export default function TarjetaPage() {
 
   if (loading || !user || !customer) {
     return (
-      <main className="flex flex-1 items-center justify-center px-4 py-10">
-        <p className="text-[13.5px] text-muted">Cargando tu tarjeta…</p>
+      <main className="mx-auto flex w-full max-w-[440px] flex-1 flex-col items-center justify-center gap-4 px-4 py-10">
+        <GridReveal
+          aspect={340 / 420}
+          caption="Generando tu tarjeta…"
+          className="w-full max-w-[300px]"
+        />
       </main>
     );
   }
 
   return (
     <main className="mx-auto flex w-full max-w-[440px] flex-1 flex-col items-center gap-6 px-4 py-10">
+      <BackButton className="self-start" />
       <div className="flex flex-col items-center gap-1 text-center">
         <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
           Tu tarjeta

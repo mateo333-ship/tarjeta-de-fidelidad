@@ -8,6 +8,7 @@ import { getAuthClient, getDbClient } from "@/lib/firebase";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { DEFAULT_CONFIG, type ProgramConfig } from "@/lib/types";
 import QrScanner from "@/components/QrScanner";
+import BackButton from "@/components/BackButton";
 
 type CustomerRow = { id: string; name: string; stamps: number; updatedAt: number };
 type ScannedCustomer = { id: string; name: string; stamps: number };
@@ -193,6 +194,7 @@ export default function NegocioPage() {
   if (access === "denied") {
     return (
       <main className="mx-auto flex w-full max-w-[420px] flex-1 flex-col items-center justify-center gap-3 px-4 py-10 text-center">
+        <BackButton className="self-center" />
         <p className="text-[14px] text-ink">Esta cuenta no tiene acceso de negocio.</p>
         <button
           type="button"
@@ -207,6 +209,7 @@ export default function NegocioPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-[520px] flex-1 flex-col gap-6 px-4 py-8">
+      <BackButton />
       <div className="flex items-center justify-between gap-2">
         <div>
           <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">

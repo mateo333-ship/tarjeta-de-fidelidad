@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getAuthClient } from "@/lib/firebase";
+import BackButton from "@/components/BackButton";
 
 function friendlyAuthError(code: string): string {
   switch (code) {
@@ -49,6 +50,7 @@ export default function NegocioLoginPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center gap-6 px-4 py-10">
+      <BackButton />
       <div className="flex flex-col gap-1.5 text-center">
         <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
           Vista interna

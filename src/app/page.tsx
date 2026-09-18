@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BusinessName } from "@/components/BusinessName";
+import { Folder } from "@/components/ui/folder";
 
 // This is what a customer lands on the instant they scan the in-store QR
 // or tap their phone on the NFC point — before they have an account.
@@ -29,18 +30,25 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/join"
-          className="rounded-xl bg-ink px-4 py-3 text-center text-[14.5px] font-semibold text-paper"
-        >
-          Consigue tu tarjeta
-        </Link>
+      <Link
+        href="/join"
+        className="rounded-xl bg-ink px-4 py-3 text-center text-[14.5px] font-semibold text-paper"
+      >
+        Consigue tu tarjeta
+      </Link>
+
+      <div className="flex flex-col items-center gap-1">
+        <p className="font-data text-[11px] uppercase tracking-[0.08em] text-muted">
+          ¿Ya tienes tarjeta?
+        </p>
+        <div className="flex h-[180px] w-[210px] items-center justify-center">
+          <Folder color="black" size="sm" />
+        </div>
         <Link
           href="/login"
-          className="rounded-xl border border-line px-4 py-3 text-center text-[14.5px] font-semibold text-muted"
+          className="-mt-3 rounded-xl border border-line px-4 py-3 text-center text-[14.5px] font-semibold text-muted"
         >
-          Ya tengo tarjeta — iniciar sesión
+          Iniciar sesión
         </Link>
       </div>
 
