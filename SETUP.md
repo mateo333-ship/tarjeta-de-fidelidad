@@ -100,11 +100,13 @@ cuentas.
   Chrome (Web NFC). iPhone no lo permite desde una web. Por eso el flujo
   principal aquí es QR (funciona en cualquier móvil) — el NFC se puede
   añadir más adelante como acceso rápido extra en Android.
-- **Un solo negocio**: esta versión asume que hay una tarjeta y un
-  programa de sellos (no varios negocios independientes en la misma
-  base de datos). Si más adelante quieres vender esto a varios negocios
-  a la vez, cada uno necesitará su propio proyecto de Firebase (o
-  ampliamos el modelo de datos para que sea multi-negocio de verdad).
+- **Un solo negocio por proyecto**: esta versión asume una tarjeta y un
+  programa de sellos por base de datos. El nombre del negocio, los
+  sellos necesarios y el premio ya se configuran desde `/negocio` (no
+  hace falta tocar código para personalizarla), pero para vender esto a
+  varios negocios a la vez cada uno necesita su propio proyecto de
+  Firebase — o ampliamos el modelo de datos más adelante para que sea
+  multi-negocio de verdad dentro de una sola base de datos.
 - **Lista de clientes**: el panel muestra los 50 clientes más
   recientes con un buscador por nombre. Si el negocio crece mucho, se
   puede mejorar con paginación o búsqueda por servidor.

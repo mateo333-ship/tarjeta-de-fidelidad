@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
-import { DEFAULT_CONFIG } from "@/lib/types";
 
-// POST /api/config  { stampsRequired: number, reward: string }
-// Updates the one shared loyalty-program document every card reads
-// (customers/{uid}.stamps is just a count; how many stamps a reward takes
-// lives here). Kept server-side, like every other write, so a client
-// can't hand itself a free reward by editing the config directly.
+// POST /api/config  { stampsRequired: number, reward: string, businessName: string }
+// Updates the one shared loyalty-program document every card (and the
+// public landing page) reads. Kept server-side, like every other write,
+// so a client can't hand itself a free reward by editing the config
+// directly. businessName lives here too — on purpose: cloning this
+// project for a different business is then a setting in /negocio, not a
+// code change.
 export async function POST(request: Request) {
   const auth = await requireMerchant(request);
   if ("error" in auth) return auth.error;
@@ -15,6 +16,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const stampsRequired = Number(body?.stampsRequired);
   const reward = String(body?.reward ?? "").trim();
+  const businessName = String(body?.businessName ?? "").trim();
 
   if (!Number.isInteger(stampsRequired) || stampsRequired < 2 || stampsRequired > 30) {
     return NextResponse.json(
@@ -28,6 +30,12 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  if (!businessName || businessName.length > 60) {
+    return NextResponse.json(
+      { error: "Escribe el nombre del negocio (máximo 60 caracteres)." },
+      { status: 400 },
+    );
+  }
 
   await adminDb()
     .collection("config")
@@ -36,7 +44,7 @@ export async function POST(request: Request) {
       {
         stampsRequired,
         reward,
-        businessName: DEFAULT_CONFIG.businessName,
+        businessName,
         updatedAt: Date.now(),
       },
       { merge: true },

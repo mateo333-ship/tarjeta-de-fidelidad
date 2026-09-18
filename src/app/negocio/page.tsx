@@ -47,6 +47,7 @@ export default function NegocioPage() {
 
   // ---- program config ----
   const [config, setConfig] = useState<ProgramConfig>(DEFAULT_CONFIG);
+  const [cfgName, setCfgName] = useState(DEFAULT_CONFIG.businessName);
   const [cfgTotal, setCfgTotal] = useState(String(DEFAULT_CONFIG.stampsRequired));
   const [cfgReward, setCfgReward] = useState(DEFAULT_CONFIG.reward);
   const [cfgSaving, setCfgSaving] = useState(false);
@@ -62,6 +63,7 @@ export default function NegocioPage() {
         businessName: data?.businessName ?? DEFAULT_CONFIG.businessName,
       };
       setConfig(next);
+      setCfgName(next.businessName);
       setCfgTotal(String(next.stampsRequired));
       setCfgReward(next.reward);
     });
@@ -74,7 +76,11 @@ export default function NegocioPage() {
     try {
       await authedFetch("/api/config", {
         method: "POST",
-        body: JSON.stringify({ stampsRequired: Number(cfgTotal), reward: cfgReward }),
+        body: JSON.stringify({
+          businessName: cfgName,
+          stampsRequired: Number(cfgTotal),
+          reward: cfgReward,
+        }),
       });
       setCfgMessage("Guardado.");
     } catch (err) {
@@ -313,6 +319,16 @@ export default function NegocioPage() {
       <section className="flex flex-col gap-3.5 rounded-2xl border border-line bg-surface p-4">
         <h2 className="text-[14.5px] font-semibold">Configuración del programa</h2>
         <form onSubmit={saveConfig} className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
+          <label className="col-span-2 flex flex-col gap-1.5 text-[12.5px] font-semibold text-muted max-[380px]:col-span-1">
+            Nombre del negocio
+            <input
+              type="text"
+              maxLength={60}
+              value={cfgName}
+              onChange={(e) => setCfgName(e.target.value)}
+              className="rounded-[9px] border border-line bg-surface-2 px-2.5 py-2 text-[14px] text-ink"
+            />
+          </label>
           <label className="flex flex-col gap-1.5 text-[12.5px] font-semibold text-muted">
             Sellos para el premio
             <input

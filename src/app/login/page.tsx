@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { getAuthClient } from "@/lib/firebase";
 
 function friendlyAuthError(code: string): string {
@@ -25,6 +25,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetState, setResetState] = useState<"idle" | "sending" | "sent">("idle");
+  const [resetError, setResetError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -37,6 +39,23 @@ export default function LoginPage() {
       const code = (err as { code?: string })?.code ?? "";
       setError(friendlyAuthError(code));
       setSubmitting(false);
+    }
+  }
+
+  async function handleReset() {
+    if (!email.trim()) {
+      setResetError("Escribe primero tu correo arriba.");
+      return;
+    }
+    setResetError(null);
+    setResetState("sending");
+    try {
+      await sendPasswordResetEmail(getAuthClient(), email.trim());
+      setResetState("sent");
+    } catch {
+      // Firebase deliberately doesn't reveal whether the address exists —
+      // show the same confirmation either way, never leak that detail.
+      setResetState("sent");
     }
   }
 
@@ -72,6 +91,24 @@ export default function LoginPage() {
         </label>
 
         {error && <p className="text-[12.5px] text-stamp">{error}</p>}
+
+        <div className="-mt-1 flex justify-end">
+          {resetState === "sent" ? (
+            <p className="text-[12px] text-muted">
+              Si ese correo tiene tarjeta, te hemos enviado un enlace para elegir contraseña nueva.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={resetState === "sending"}
+              className="text-[12px] text-muted underline underline-offset-2 disabled:opacity-50"
+            >
+              {resetState === "sending" ? "Enviando…" : "¿Olvidaste tu contraseña?"}
+            </button>
+          )}
+        </div>
+        {resetError && <p className="text-[12px] text-stamp">{resetError}</p>}
 
         <button
           type="submit"

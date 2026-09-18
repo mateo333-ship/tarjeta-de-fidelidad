@@ -34,13 +34,20 @@ service cloud.firestore {
 
     match /customers/{uid} {
       // A brand-new customer creates their OWN doc at signup, starting
-      // at zero stamps. They can never create it for someone else, and
-      // never with a starting balance.
+      // at zero stamps, with a real (non-empty, bounded) name and email.
+      // They can never create it for someone else, never with a starting
+      // balance, and never with extra fields the app doesn't expect.
       allow create: if isOwner(uid)
         && request.resource.data.stamps == 0
         && request.resource.data.keys().hasOnly(
           ['name', 'email', 'stamps', 'createdAt', 'updatedAt']
-        );
+        )
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.email.size() <= 120;
 
       // Read your own card; a merchant can read any card (needed to look
       // one up after a QR scan) and list all of them (the dashboard).

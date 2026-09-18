@@ -1,11 +1,36 @@
 import Link from "next/link";
+import { adminDb } from "@/lib/firebaseAdmin";
+import { DEFAULT_CONFIG } from "@/lib/types";
+
+// The Admin SDK call below isn't a `fetch()`, so Next.js's automatic
+// dynamic-detection doesn't reliably catch it — force this route to
+// render per request rather than being frozen with whatever
+// businessName happened to exist at build time.
+export const dynamic = "force-dynamic";
+
+async function getPublicConfig() {
+  try {
+    const snap = await adminDb().collection("config").doc("settings").get();
+    const data = snap.exists ? snap.data() : null;
+    return {
+      businessName: data?.businessName || DEFAULT_CONFIG.businessName,
+    };
+  } catch {
+    // Firebase not configured yet (no env vars) or a transient read error —
+    // fall back to the generic placeholder rather than breaking the page.
+    return { businessName: DEFAULT_CONFIG.businessName };
+  }
+}
 
 // This is what a customer lands on the instant they scan the in-store QR
-// or tap their phone on the NFC point — before they have an account, and
-// before there's any specific business branding to show (that's the
-// point of this build: swap the name/logo per client, everything else
-// stays the same).
-export default function Home() {
+// or tap their phone on the NFC point — before they have an account. The
+// business name comes straight from the merchant's own config (set in
+// /negocio, see api/config/route.ts), read here on the server with the
+// Admin SDK, so cloning this project for a new business is a config
+// change from the dashboard, never a code edit.
+export default async function Home() {
+  const { businessName } = await getPublicConfig();
+
   return (
     <main className="mx-auto flex w-full max-w-[440px] flex-1 flex-col justify-center gap-8 px-4 py-10">
       <div className="flex flex-col items-center gap-3 text-center">
@@ -15,7 +40,7 @@ export default function Home() {
         <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
           Has escaneado la tarjeta de
         </p>
-        <h1 className="font-display text-[26px] font-semibold">Tu Negocio</h1>
+        <h1 className="font-display text-[26px] font-semibold">{businessName}</h1>
         <p className="max-w-[32ch] text-[14px] text-muted">
           Consigue tu tarjeta de sellos: guarda cada visita y canjea tu premio cuando la completes.
         </p>
