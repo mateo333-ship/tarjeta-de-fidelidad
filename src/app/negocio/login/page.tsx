@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getAuthClient } from "@/lib/firebase";
 import BackButton from "@/components/BackButton";
@@ -94,6 +95,13 @@ export default function NegocioLoginPage() {
           {submitting ? "Entrando…" : "Entrar"}
         </button>
       </form>
+
+      <p className="text-center text-[12.5px] text-muted">
+        ¿Primera vez configurando el negocio?{" "}
+        <Link href="/negocio/activar" className="font-semibold text-ink underline underline-offset-2">
+          Actívalo aquí
+        </Link>
+      </p>
     </main>
   );
 }

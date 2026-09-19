@@ -18,47 +18,57 @@ GitHub + Vercel (las cuentas que ya tienes).
 6. **Cuenta de servicio** (para el Admin SDK, que usan las rutas `/api/*`): *Configuración del proyecto* → *Cuentas de servicio* → **Generar nueva clave privada**. Se descarga un `.json`.
    - Guárdalo **fuera** de esta carpeta del proyecto (nunca lo subas a GitHub). De ahí sacas `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` y `FIREBASE_PRIVATE_KEY` (los campos `project_id`, `client_email` y `private_key` del JSON).
 
-## 2. Variables de entorno
+## 2. Variables de entorno en Vercel
 
-Copia `.env.example` a `.env.local` y rellena los nueve valores del paso 1. Para probarlo en tu ordenador:
+En [vercel.com](https://vercel.com), abre tu proyecto → **Settings →
+Environment Variables**, y añade ahí los nueve valores del paso 1 (los
+seis `NEXT_PUBLIC_FIREBASE_*` y los tres `FIREBASE_*` del Admin SDK),
+usando exactamente los mismos nombres que en `.env.example`. Vercel
+acepta bien que `FIREBASE_PRIVATE_KEY` tenga varias líneas, pégala tal
+cual viene en el JSON descargado.
 
-```bash
-npm install
-npm run dev
-```
-
-Abre `http://localhost:3000`.
+Guarda y despliega de nuevo (Deployments → ⋯ → Redeploy) para que la web
+recoja las variables nuevas.
 
 ## 3. Subir a GitHub y desplegar en Vercel
 
-```bash
-git init   # si no lo has hecho ya
-git add .
-git commit -m "Primera versión de Sello Digital"
-```
-
-Crea un repositorio nuevo en GitHub y sigue las instrucciones para subir
-este commit (`git remote add origin ...` y `git push`).
-
-En [vercel.com](https://vercel.com) → **Add New → Project** → importa ese
-repositorio. En *Environment Variables*, añade las mismas nueve variables
-de `.env.local` (cópialas y pégalas tal cual, Vercel las separa bien
-aunque `FIREBASE_PRIVATE_KEY` tenga varias líneas). Despliega.
+Ya tienes este paso hecho si estás leyendo esto desde la web en
+producción: subes el contenido del proyecto a tu repositorio de GitHub
+(Add file → Upload files) y Vercel despliega solo. Repite ese mismo
+proceso cada vez que recibas una actualización del código.
 
 ## 4. Convertir tu cuenta en cuenta de negocio
 
 El panel `/negocio` solo lo puede usar una cuenta marcada como
-"merchant". Nadie puede marcarse a sí mismo — se hace desde tu ordenador
-con la clave de servicio del paso 1:
+"merchant" (negocio). Nadie puede marcarse a sí misma — hace falta la
+clave de servicio del paso 1. Hay dos formas de hacerlo:
 
-1. Regístrate una vez como cliente normal en `/join` (con tu propio
-   correo). Así existe la cuenta que vas a promocionar.
-2. En tu terminal, desde esta carpeta:
+**Opción A — sin terminal, desde el navegador (recomendada):**
+
+1. Regístrate una vez como cliente normal en `/join`, con tu propio
+   correo. Así existe la cuenta que vas a convertir en cuenta de
+   negocio.
+2. En Vercel, añade una variable de entorno más: `SETUP_SECRET`, con
+   cualquier texto secreto que inventes (por ejemplo una frase larga).
+   Vuelve a desplegar.
+3. Abre `/negocio/activar` en tu web, inicia sesión con esa cuenta y
+   escribe el mismo texto secreto. Tu cuenta queda activada al momento,
+   sin tocar ninguna terminal.
+4. Por seguridad, borra la variable `SETUP_SECRET` de Vercel cuando
+   termines (y vuelve a desplegar) — así esa página deja de funcionar
+   hasta que la necesites otra vez, por ejemplo para dar acceso a un
+   empleado.
+
+**Opción B — con terminal (si en algún momento instalas Node.js y
+prefieres este método, o quieres dar acceso a más cuentas sin usar
+`SETUP_SECRET`):**
+
+1. En tu terminal, desde esta carpeta:
    ```bash
    GOOGLE_APPLICATION_CREDENTIALS=/ruta/a/tu-clave-de-servicio.json \
      node scripts/setMerchant.mjs tu-correo@ejemplo.com
    ```
-3. Entra en `/negocio/login` con ese mismo correo. Ya tienes acceso al
+2. Entra en `/negocio/login` con ese mismo correo. Ya tienes acceso al
    panel del negocio, con cámara para escanear tarjetas.
 
 ## 5. Probarlo de verdad
