@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
+  },
+  "overrides": {
+    "jose": "5.10.0"
   },
   "dependencies": {
     "animejs": "^4.5.0",
