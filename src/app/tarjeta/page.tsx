@@ -29,6 +29,8 @@ export default function TarjetaPage() {
   const [customer, setCustomer] = useState<CustomerDoc | null>(null);
   const [config, setConfig] = useState<ProgramConfig>(DEFAULT_CONFIG);
   const [revealed, setRevealed] = useState(false);
+  const [walletBusy, setWalletBusy] = useState(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -58,6 +60,31 @@ export default function TarjetaPage() {
       unsubConfig();
     };
   }, [loading, user, router]);
+
+  async function addToGoogleWallet() {
+    if (!user) return;
+    setWalletBusy(true);
+    setWalletError(null);
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch("/api/wallet/google", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setWalletError(data.error ?? "No se pudo añadir a Google Wallet.");
+        setWalletBusy(false);
+        return;
+      }
+      // Full navigation, not a fetch: Google's save flow needs to run in
+      // the top-level page itself.
+      window.location.href = data.url;
+    } catch {
+      setWalletError("No se pudo añadir a Google Wallet. Comprueba tu conexión.");
+      setWalletBusy(false);
+    }
+  }
 
   if (loading || !user || !customer) {
     return (
@@ -135,13 +162,14 @@ export default function TarjetaPage() {
           </button>
           <button
             type="button"
-            disabled
-            title="Se activará cuando el negocio configure Google Wallet."
-            className="rounded-[10px] border border-line px-3.5 py-2 text-[13px] font-semibold text-muted opacity-50"
+            onClick={addToGoogleWallet}
+            disabled={walletBusy}
+            className="rounded-[10px] border border-line px-3.5 py-2 text-[13px] font-semibold text-ink disabled:opacity-50"
           >
-            Añadir a Google Wallet
+            {walletBusy ? "Preparando…" : "Añadir a Google Wallet"}
           </button>
         </div>
+        {walletError && <p className="max-w-[30ch] text-center text-[12px] text-stamp">{walletError}</p>}
         <InstallPwaButton />
       </div>
 

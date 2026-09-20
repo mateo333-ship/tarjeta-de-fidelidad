@@ -80,29 +80,76 @@ prefieres este método, o quieres dar acceso a más cuentas sin usar
   ordenador). El sistema reconoce a la persona al instante y con "+1
   sello" su tarjeta se actualiza sola.
 
-## Sobre Apple Wallet / Google Wallet
+## 6. Activar "Añadir a Google Wallet"
 
-Ahora mismo, los botones "Añadir a Apple Wallet" / "Añadir a Google
-Wallet" en `/tarjeta` están desactivados a propósito: generar un pase
-real y firmado requiere cuentas de desarrollador que solo tú puedes
-crear:
+El código de este paso ya está hecho y desplegado — el botón "Añadir a
+Google Wallet" en `/tarjeta` funciona en cuanto rellenes 3 variables de
+entorno más. Igual que con Firebase, necesitas tu propia cuenta; aquí
+están los pasos, uno a uno.
 
-- **Apple Wallet**: cuenta Apple Developer (99 $/año) + un certificado
-  *Pass Type ID*. Con eso, se genera el `.pkpass` en el servidor (por
-  ejemplo con la librería `passkit-generator`) y, si además quieres que
-  el pase se actualice solo cuando sumas un sello (sin que el cliente
-  tenga que volver a abrir la web), hace falta un servicio web de
-  notificaciones push de Apple (APNs) — es un desarrollo aparte, dímelo
-  cuando tengas la cuenta y lo añadimos.
-- **Google Wallet**: proyecto en Google Cloud + cuenta de **Google
-  Wallet Issuer** (Google la revisa y aprueba, puede tardar unos días) +
-  una cuenta de servicio con permisos de Wallet Objects API.
+1. **Regístrate como Google Wallet Issuer**: entra en
+   [pay.google.com/business/console](https://pay.google.com/business/console/signup)
+   con tu cuenta de Google y sigue el registro (nombre del negocio,
+   contacto). Al terminar verás tu **Issuer ID** — un número, en la
+   esquina superior de la consola. Ese es tu `GOOGLE_WALLET_ISSUER_ID`.
+   - Las cuentas nuevas empiezan en modo *prueba*: solo las cuentas de
+     Google que añadas como "testers" en esa misma consola pueden
+     añadir el pase hasta que Google apruebe tu programa para todo el
+     mundo (revisión gratuita, normalmente unos días — pídela desde la
+     consola cuando quieras pasar a producción). Añade ahí tu propia
+     cuenta de Google como tester para poder probarlo tú primero.
+2. **Activa la API en el mismo proyecto de Firebase** (Firebase y
+   Google Cloud son el mismo proyecto por debajo, así que reutilizas
+   el que ya tienes): ve a
+   [console.cloud.google.com/apis/library/walletobjects.googleapis.com](https://console.cloud.google.com/apis/library/walletobjects.googleapis.com),
+   confirma que arriba pone el nombre de tu proyecto de Firebase, y
+   pulsa **Habilitar**.
+3. **Crea una cuenta de servicio para Wallet** (es como la que ya
+   creaste para Firebase Admin, pero para esta API): en
+   [console.cloud.google.com/iam-admin/serviceaccounts](https://console.cloud.google.com/iam-admin/serviceaccounts)
+   (mismo proyecto) → **Crear cuenta de servicio** → dale un nombre
+   como `wallet-issuer` → sin necesidad de asignarle ningún rol aquí →
+   **Listo**. Entra en esa cuenta creada → pestaña **Claves** → **Añadir
+   clave** → **Crear clave nueva** → JSON. Se descarga un `.json`
+   (guárdalo fuera de esta carpeta, igual que el de Firebase).
+4. **Dale permiso en la consola de Wallet**: vuelve a la consola del
+   paso 1 → apartado de usuarios/permisos de la cuenta de emisor
+   (*Users*) → añade el correo `client_email` de ese mismo `.json` con
+   permiso de **Administrador**.
+5. **Variables de entorno en Vercel** (Settings → Environment
+   Variables, igual que en el paso 2 de más arriba):
+   - `GOOGLE_WALLET_ISSUER_ID`: el número del paso 1.
+   - `GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL`: el campo `client_email` del
+     `.json` del paso 3.
+   - `GOOGLE_WALLET_PRIVATE_KEY`: el campo `private_key` de ese mismo
+     `.json`, pegado tal cual (con los `\n` incluidos, igual que
+     `FIREBASE_PRIVATE_KEY`).
+   Redespliega para que la web recoja las variables nuevas.
+6. **Pruébalo**: entra en `/tarjeta` con la cuenta de Google que
+   añadiste como tester en el paso 1 y pulsa "Añadir a Google Wallet".
+   A partir de ahí, cada vez que un sello se añada o se canjee un
+   premio, el pase que esa persona ya tiene en su móvil se actualiza
+   solo — no hace falta que abra la web para verlo.
+
+## Sobre Apple Wallet
+
+El botón "Añadir a Apple Wallet" sigue desactivado a propósito:
+generar un `.pkpass` real y firmado requiere una cuenta **Apple
+Developer Program** (99 $/año) y un certificado *Pass Type ID*, que
+solo tú puedes crear con tu identidad de Apple. En cuanto tengas esa
+cuenta, dímelo y lo añadimos — el resto del código (servidor, base de
+datos) ya está preparado para esto, así que es un desarrollo acotado,
+no hay que tocar nada más de la app.
+
+Si además quieres que el pase de Apple se actualice solo (como ya pasa
+con Google Wallet) hace falta un servicio de notificaciones push de
+Apple (APNs) — también es una pieza aparte que añadimos en ese momento.
 
 Mientras tanto, el botón **"Añadir a pantalla de inicio"** ya funciona
 de verdad hoy mismo (en Android instala la web como una app con icono
 propio; en iPhone explica los dos toques para hacerlo a mano) — es la
-alternativa más cercana a una tarjeta de wallet sin depender de esas
-cuentas.
+alternativa más cercana a una tarjeta de wallet sin depender de esa
+cuenta.
 
 ## Limitaciones a tener en cuenta ahora mismo
 

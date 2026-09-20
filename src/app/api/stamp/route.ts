@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
 import { DEFAULT_CONFIG } from "@/lib/types";
 import { isValidUid } from "@/lib/sanitize";
+import { bestEffortSync } from "@/lib/googleWallet";
 
 // POST /api/stamp  { customerId: string }
 // The one action a clerk takes at the till after scanning a customer's
@@ -26,6 +27,16 @@ export async function POST(request: Request) {
   const customerRef = db.collection("customers").doc(customerId);
   const configRef = db.collection("config").doc("settings");
 
+  // Filled in inside the transaction so the (best-effort) Google Wallet
+  // refresh below can run with the same name/program details, without a
+  // second round of reads.
+  let walletSyncInput: {
+    name: string;
+    businessName: string;
+    stampsRequired: number;
+    reward: string;
+  } | null = null;
+
   try {
     const result = await db.runTransaction(async (tx) => {
       const [customerSnap, configSnap] = await Promise.all([
@@ -37,9 +48,10 @@ export async function POST(request: Request) {
         throw new Error("NOT_FOUND");
       }
 
-      const stampsRequired =
-        (configSnap.exists ? configSnap.data()?.stampsRequired : null) ??
-        DEFAULT_CONFIG.stampsRequired;
+      const configData = configSnap.exists ? configSnap.data() : null;
+      const stampsRequired = configData?.stampsRequired ?? DEFAULT_CONFIG.stampsRequired;
+      const businessName = configData?.businessName ?? DEFAULT_CONFIG.businessName;
+      const reward = configData?.reward ?? DEFAULT_CONFIG.reward;
 
       const current = customerSnap.data()?.stamps ?? 0;
       if (current >= stampsRequired) {
@@ -56,8 +68,23 @@ export async function POST(request: Request) {
         by: auth.user.uid,
       });
 
+      walletSyncInput = {
+        name: customerSnap.data()?.name ?? "Cliente",
+        businessName,
+        stampsRequired,
+        reward,
+      };
+
       return next;
     });
+
+    if (walletSyncInput) {
+      const { name, businessName, stampsRequired, reward } = walletSyncInput;
+      const origin = new URL(request.url).origin;
+      after(() =>
+        bestEffortSync({ origin, businessName, uid: customerId, name, stamps: result, stampsRequired, reward }),
+      );
+    }
 
     return NextResponse.json({ stamps: result });
   } catch (err) {

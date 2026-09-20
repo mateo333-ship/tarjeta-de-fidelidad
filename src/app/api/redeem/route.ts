@@ -1,7 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
 import { isValidUid } from "@/lib/sanitize";
+import { DEFAULT_CONFIG } from "@/lib/types";
+import { bestEffortSync } from "@/lib/googleWallet";
 
 // POST /api/redeem  { customerId: string }
 // The clerk hands over the reward and resets that one card to zero so a
@@ -18,7 +20,10 @@ export async function POST(request: Request) {
 
   const db = adminDb();
   const customerRef = db.collection("customers").doc(customerId);
-  const snap = await customerRef.get();
+  const [snap, configSnap] = await Promise.all([
+    customerRef.get(),
+    db.collection("config").doc("settings").get(),
+  ]);
   if (!snap.exists) {
     return NextResponse.json({ error: "No existe esa tarjeta." }, { status: 404 });
   }
@@ -29,6 +34,20 @@ export async function POST(request: Request) {
     at: Date.now(),
     by: auth.user.uid,
   });
+
+  const configData = configSnap.exists ? configSnap.data() : null;
+  const origin = new URL(request.url).origin;
+  after(() =>
+    bestEffortSync({
+      origin,
+      businessName: configData?.businessName ?? DEFAULT_CONFIG.businessName,
+      uid: customerId,
+      name: snap.data()?.name ?? "Cliente",
+      stamps: 0,
+      stampsRequired: configData?.stampsRequired ?? DEFAULT_CONFIG.stampsRequired,
+      reward: configData?.reward ?? DEFAULT_CONFIG.reward,
+    }),
+  );
 
   return NextResponse.json({ stamps: 0 });
 }
