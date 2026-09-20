@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
+import { isValidUid } from "@/lib/sanitize";
 
 // GET /api/lookup?id=<customerUid>
 // Used by the merchant dashboard right after a QR scan: turns the code on
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
   if ("error" in auth) return auth.error;
 
   const id = new URL(request.url).searchParams.get("id");
-  if (!id) {
+  if (!isValidUid(id)) {
     return NextResponse.json({ error: "Falta el parámetro id." }, { status: 400 });
   }
 

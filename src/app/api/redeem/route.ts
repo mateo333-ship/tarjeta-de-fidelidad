@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
+import { isValidUid } from "@/lib/sanitize";
 
 // POST /api/redeem  { customerId: string }
 // The clerk hands over the reward and resets that one card to zero so a
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   const customerId = body?.customerId;
-  if (!customerId || typeof customerId !== "string") {
+  if (!isValidUid(customerId)) {
     return NextResponse.json({ error: "Falta customerId." }, { status: 400 });
   }
 

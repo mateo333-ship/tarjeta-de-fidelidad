@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
 import { DEFAULT_CONFIG } from "@/lib/types";
+import { isValidUid } from "@/lib/sanitize";
 
 // POST /api/stamp  { customerId: string }
 // The one action a clerk takes at the till after scanning a customer's
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   const customerId = body?.customerId;
-  if (!customerId || typeof customerId !== "string") {
+  if (!isValidUid(customerId)) {
     return NextResponse.json({ error: "Falta customerId." }, { status: 400 });
   }
 

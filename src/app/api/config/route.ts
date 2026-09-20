@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { requireMerchant } from "@/lib/authServer";
+import { sanitizeText } from "@/lib/sanitize";
 
 // POST /api/config  { stampsRequired: number, reward: string, businessName: string }
 // Updates the one shared loyalty-program document every card (and the
@@ -15,8 +16,8 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null);
   const stampsRequired = Number(body?.stampsRequired);
-  const reward = String(body?.reward ?? "").trim();
-  const businessName = String(body?.businessName ?? "").trim();
+  const reward = sanitizeText(body?.reward, 80);
+  const businessName = sanitizeText(body?.businessName, 60);
 
   if (!Number.isInteger(stampsRequired) || stampsRequired < 2 || stampsRequired > 30) {
     return NextResponse.json(

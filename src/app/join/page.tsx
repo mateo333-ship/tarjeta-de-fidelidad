@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { getAuthClient, getDbClient } from "@/lib/firebase";
+import { sanitizeText } from "@/lib/sanitize";
 import BackButton from "@/components/BackButton";
 
 function friendlyAuthError(code: string): string {
@@ -33,14 +34,16 @@ export default function JoinPage() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+    const cleanName = sanitizeText(name, 60);
+    const cleanEmail = sanitizeText(email, 120);
     try {
-      const cred = await createUserWithEmailAndPassword(getAuthClient(), email.trim(), password);
-      await updateProfile(cred.user, { displayName: name.trim() });
+      const cred = await createUserWithEmailAndPassword(getAuthClient(), cleanEmail, password);
+      await updateProfile(cred.user, { displayName: cleanName });
 
       const now = Date.now();
       await setDoc(doc(getDbClient(), "customers", cred.user.uid), {
-        name: name.trim(),
-        email: email.trim(),
+        name: cleanName,
+        email: cleanEmail,
         stamps: 0,
         createdAt: now,
         updatedAt: now,
