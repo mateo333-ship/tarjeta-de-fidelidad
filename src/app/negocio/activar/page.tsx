@@ -51,7 +51,7 @@ export default function ActivarNegocioPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center gap-6 px-4 py-10">
-      <BackButton />
+      <BackButton fallbackHref="/negocio/login" />
       <div className="flex flex-col gap-1.5 text-center">
         <p className="font-data text-[11px] font-bold uppercase tracking-[0.11em] text-stamp">
           Solo una vez

@@ -194,7 +194,7 @@ export default function NegocioPage() {
   if (access === "denied") {
     return (
       <main className="mx-auto flex w-full max-w-[420px] flex-1 flex-col items-center justify-center gap-3 px-4 py-10 text-center">
-        <BackButton className="self-center" />
+        <BackButton className="self-center" fallbackHref="/negocio/login" />
         <p className="text-[14px] text-ink">Esta cuenta no tiene acceso de negocio.</p>
         <button
           type="button"
