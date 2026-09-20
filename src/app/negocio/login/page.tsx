@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getAuthClient } from "@/lib/firebase";
-import { useAuthUser } from "@/lib/useAuthUser";
 import BackButton from "@/components/BackButton";
 
 function friendlyAuthError(code: string): string {
@@ -21,53 +20,19 @@ function friendlyAuthError(code: string): string {
 
 export default function NegocioLoginPage() {
   const router = useRouter();
-  const { user, loading } = useAuthUser();
 
-  // Business access is just a permission on top of the SAME account
-  // system as /login and /join — there's no separate "business login".
-  // So if the person already has a session going (e.g. they signed in
-  // as a customer on /tarjeta a moment ago), we detect that here instead
-  // of making them type their email and password again: straight to the
-  // panel if that account already has merchant access, or straight to
-  // the one-time activation step if it doesn't.
-  const [needsActivation, setNeedsActivation] = useState(false);
-  const [claimResolved, setClaimResolved] = useState(false);
-
-  useEffect(() => {
-    // Nothing to check yet (still loading), or no session to check at
-    // all — the render below already handles both cases from `loading`
-    // and `user` directly, with no state of our own needed here.
-    if (loading || !user) return;
-
-    let cancelled = false;
-    user
-      .getIdTokenResult()
-      .then((token) => {
-        if (cancelled) return;
-        if (token.claims.merchant === true) {
-          router.replace("/negocio");
-          return;
-        }
-        setNeedsActivation(true);
-        setClaimResolved(true);
-      })
-      .catch(() => {
-        if (!cancelled) setClaimResolved(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [loading, user, router]);
-
-  // True only while we have a signed-in user whose merchant claim we
-  // haven't resolved yet — avoids flashing the login form right before
-  // an automatic redirect to /negocio.
-  const checkingClaim = !loading && !!user && !claimResolved;
-
+  // Deliberately always shows the email/password form below, even if
+  // there's already a signed-in session (e.g. from /tarjeta) — accessing
+  // the business panel must always mean typing the password again, not
+  // walking in on whatever account happens to be signed in on this
+  // device. The one thing this page does reuse is the account SYSTEM:
+  // it's the same sign-in as /login and /join, business access is just a
+  // permission on top of it.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsActivation, setNeedsActivation] = useState<string | null>(null); // holds the signed-in email, or null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,10 +43,10 @@ export default function NegocioLoginPage() {
       // force-refresh: pick up a merchant claim granted moments ago
       const token = await cred.user.getIdTokenResult(true);
       if (token.claims.merchant !== true) {
-        // Don't sign back out — just let the effect above notice this
-        // session and show the "needs activation" screen below, using
-        // the account they just signed in with.
-        setNeedsActivation(true);
+        // They proved they own this account by typing its password, so
+        // there's no need to sign them out — just point them at the
+        // one-time activation step instead of a dead-end error.
+        setNeedsActivation(cred.user.email);
         setSubmitting(false);
         return;
       }
@@ -93,19 +58,7 @@ export default function NegocioLoginPage() {
     }
   }
 
-  // Still figuring out whether there's already a usable session —
-  // avoids flashing the login form for someone about to be redirected.
-  if (loading || checkingClaim) {
-    return (
-      <main className="flex flex-1 items-center justify-center px-4 py-10">
-        <p className="text-[13.5px] text-muted">Comprobando acceso…</p>
-      </main>
-    );
-  }
-
-  // Already signed in (as a customer or otherwise), just not as a
-  // merchant yet — skip straight to activation, no password re-entry.
-  if (user && needsActivation) {
+  if (needsActivation) {
     return (
       <main className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center gap-6 px-4 py-10">
         <BackButton />
@@ -117,7 +70,7 @@ export default function NegocioLoginPage() {
         </div>
         <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-[13.5px] text-muted">
-            Sesión iniciada como <span className="font-semibold text-ink">{user.email}</span>.
+            Sesión iniciada como <span className="font-semibold text-ink">{needsActivation}</span>.
             Esta cuenta todavía no tiene acceso de negocio.
           </p>
           <Link
@@ -128,7 +81,7 @@ export default function NegocioLoginPage() {
           </Link>
           <button
             type="button"
-            onClick={() => signOut(getAuthClient()).then(() => window.location.reload())}
+            onClick={() => signOut(getAuthClient()).then(() => setNeedsActivation(null))}
             className="font-data text-[11px] uppercase tracking-[0.08em] text-muted underline underline-offset-2"
           >
             Usar otra cuenta
