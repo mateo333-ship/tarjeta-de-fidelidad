@@ -31,7 +31,7 @@ export default function ActivarNegocioPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${idToken}`,
         },
-        body: JSON.stringify({ secret }),
+        body: JSON.stringify({ secret: secret.trim() }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
@@ -87,6 +87,11 @@ export default function ActivarNegocioPage() {
             <input
               required
               type="text"
+              inputMode="text"
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
               value={secret}
               onChange={(e) => setSecret(e.target.value)}
               className="rounded-[10px] border border-line bg-surface px-3 py-2.5 text-[14px] text-ink"

@@ -19,7 +19,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No has iniciado sesión." }, { status: 401 });
   }
 
-  const expected = process.env.SETUP_SECRET;
+  // Trimmed defensively: a stray trailing space or newline is an easy
+  // mistake to make when pasting into Vercel's env var field (or when a
+  // mobile keyboard adds one), and would otherwise cause a confusing,
+  // silent mismatch here.
+  const expected = process.env.SETUP_SECRET?.trim();
   if (!expected) {
     return NextResponse.json(
       {
@@ -33,7 +37,7 @@ export async function POST(request: Request) {
   let secret = "";
   try {
     const body = await request.json();
-    secret = typeof body?.secret === "string" ? body.secret : "";
+    secret = typeof body?.secret === "string" ? body.secret.trim() : "";
   } catch {
     // no body / invalid JSON — treated as a wrong secret below
   }
