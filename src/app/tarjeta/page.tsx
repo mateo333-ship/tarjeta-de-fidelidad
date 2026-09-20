@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { signOut } from "firebase/auth";
@@ -144,13 +145,25 @@ export default function TarjetaPage() {
         <InstallPwaButton />
       </div>
 
-      <button
-        type="button"
-        onClick={() => signOut(getAuthClient()).then(() => router.replace("/"))}
-        className="mt-2 font-data text-[11px] uppercase tracking-[0.08em] text-muted underline underline-offset-2"
-      >
-        Cerrar sesión
-      </button>
+      <div className="mt-2 flex flex-col items-center gap-2">
+        <button
+          type="button"
+          onClick={() => signOut(getAuthClient()).then(() => router.replace("/"))}
+          className="font-data text-[11px] uppercase tracking-[0.08em] text-muted underline underline-offset-2"
+        >
+          Cerrar sesión
+        </button>
+        {/* Same shortcut the landing page offers — lets the business
+            owner (who is also a customer, testing their own card) jump
+            straight to the business panel from here, instead of having
+            to back out to "/" first just to find this link again. */}
+        <Link
+          href="/negocio/login"
+          className="font-data text-[10.5px] uppercase tracking-[0.06em] text-muted/70 underline underline-offset-2"
+        >
+          Acceso del negocio
+        </Link>
+      </div>
     </main>
   );
 }
